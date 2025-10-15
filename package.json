@@ -1,1 +1,19 @@
+{
+  "name": "hackeros-game-mode",
+  "version": "1.0.0",
+  "description": "HackerOS Game Mode overlay for Linux system monitoring",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-packager . HackerOSGameMode --platform=linux --arch=x64 --out=dist --overwrite"
+  },
+  "author": "HackerOS Team",
+  "license": "MIT",
+  "dependencies": {
+    "electron": "^25.0.0"
+  },
+  "devDependencies": {
+    "electron-packager": "^17.0.0"
+  }
+}
 
