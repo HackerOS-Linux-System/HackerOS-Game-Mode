@@ -10,33 +10,44 @@
     <div class="overlay-container">
         <div class="overlay-top-left">
             <h2>CPU Stats</h2>
+            <canvas id="cpu-gauge" width="150" height="150"></canvas>
             <p>Temperature: <span id="cpu-temp">N/A</span> °C</p>
             <p>Usage: <span id="cpu-usage">N/A</span> %</p>
             <p>Frequency: <span id="cpu-freq">N/A</span> MHz</p>
+            <p>Voltage: <span id="cpu-voltage">N/A</span> V</p>
             <p>Fan Speed: <span id="cpu-fan">N/A</span> RPM</p>
         </div>
         <div class="overlay-top-right">
             <h2>GPU Stats</h2>
+            <canvas id="gpu-gauge" width="150" height="150"></canvas>
             <p>Temperature: <span id="gpu-temp">N/A</span> °C</p>
             <p>Usage: <span id="gpu-usage">N/A</span> %</p>
             <p>Fan Speed: <span id="gpu-fan">N/A</span> %</p>
             <p>Memory: <span id="gpu-mem">N/A</span> MiB</p>
+            <p>Power: <span id="gpu-power">N/A</span> W</p>
         </div>
         <div class="overlay-bottom-left">
             <h2>System Stats</h2>
-            <p>RAM Usage: <span id="ram-usage">N/A</span> %</p>
-            <p>Disk Usage: <span id="disk-usage">N/A</span> %</p>
+            <p>RAM Usage: <span id="ram-usage">N/A</span></p>
+            <p>Disk Usage: <span id="disk-usage">N/A</span></p>
             <p>Battery: <span id="battery-level">N/A</span> %</p>
             <p>Uptime: <span id="uptime">N/A</span></p>
+            <p>Load Avg: <span id="load-avg">N/A</span></p>
         </div>
         <div class="overlay-bottom-right">
             <h2>Network & FPS</h2>
-            <p>Download: <span id="net-download">N/A</span> Mbps</p>
-            <p>Upload: <span id="net-upload">N/A</span> Mbps</p>
+            <p>Download: <span id="net-download">N/A</span></p>
+            <p>Upload: <span id="net-upload">N/A</span></p>
             <p>FPS: <span id="fps">N/A</span></p>
         </div>
         <div class="overlay-center">
             <h1>HackerOS Game Mode</h1>
+            <div class="performance-modes">
+                <button class="mode-btn">Silent</button>
+                <button class="mode-btn active">Performance</button>
+                <button class="mode-btn">Turbo</button>
+                <button class="mode-btn">Manual</button>
+            </div>
             <canvas id="cpu-chart" width="200" height="100"></canvas>
             <canvas id="gpu-chart" width="200" height="100"></canvas>
         </div>
