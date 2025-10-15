@@ -1,0 +1,49 @@
+body {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    font-family: Arial, sans-serif;
+}
+
+.overlay {
+    background-color: rgba(128, 128, 128, 0.8); /* Gray semi-transparent */
+    color: #000000; /* Black text */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    width: 360px;
+    text-align: left;
+}
+
+h1 {
+    font-size: 20px;
+    margin-bottom: 15px;
+    color: #FFFFFF; /* White for accent */
+    text-align: center;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+.stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.2); /* Darker gray for stats */
+    padding: 8px;
+    border-radius: 5px;
+    color: #FFFFFF; /* White text for stats */
+}
+
+label {
+    font-weight: bold;
+    color: #FFFFFF;
+}
+
+span {
+    font-size: 14px;
+    color: #FFFFFF;
+}
