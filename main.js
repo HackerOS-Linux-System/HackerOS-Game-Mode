@@ -1,4 +1,4 @@
-const { app, BrowserWindow, globalShortcut } = require('electron');
+const { app, BrowserWindow, globalShortcut, screen } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
@@ -6,9 +6,14 @@ let mainWindow;
 let config = { autoLaunch: false, shortcut: 'CommandOrControl+G' };
 
 function createWindow() {
+    const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+
     mainWindow = new BrowserWindow({
-        width: 400,
-        height: 500,
+        width: width,
+        height: height,
+        x: 0,
+        y: 0,
+        fullscreen: true,
         frame: false,
         transparent: true,
         alwaysOnTop: true,
@@ -23,7 +28,7 @@ function createWindow() {
     });
 
     mainWindow.loadFile('index.html');
-    mainWindow.setIgnoreMouseEvents(true); // Make it non-interactive, just overlay
+    mainWindow.setIgnoreMouseEvents(true);
     mainWindow.hide(); // Start hidden
 }
 
