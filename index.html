@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HackerOS Game Mode</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="overlay">
+        <h1>HackerOS Game Mode</h1>
+        <div class="stats">
+            <div class="stat">
+                <label>CPU Temperature:</label>
+                <span id="cpu-temp">Loading...</span> °C
+            </div>
+            <div class="stat">
+                <label>CPU Usage:</label>
+                <span id="cpu-usage">Loading...</span> %
+            </div>
+            <div class="stat">
+                <label>CPU Frequency:</label>
+                <span id="cpu-freq">Loading...</span> MHz
+            </div>
+            <div class="stat">
+                <label>GPU Temperature:</label>
+                <span id="gpu-temp">Loading...</span> °C
+            </div>
+            <div class="stat">
+                <label>GPU Usage:</label>
+                <span id="gpu-usage">Loading...</span> %
+            </div>
+            <div class="stat">
+                <label>GPU Fan Speed:</label>
+                <span id="gpu-fan">Loading...</span> %
+            </div>
+            <div class="stat">
+                <label>GPU Memory:</label>
+                <span id="gpu-mem">Loading...</span> MiB
+            </div>
+            <div class="stat">
+                <label>RAM Usage:</label>
+                <span id="ram-usage">Loading...</span> %
+            </div>
+            <div class="stat">
+                <label>Disk Usage:</label>
+                <span id="disk-usage">Loading...</span> %
+            </div>
+            <div class="stat">
+                <label>Battery Level:</label>
+                <span id="battery-level">Loading...</span> %
+            </div>
+            <div class="stat">
+                <label>System Uptime:</label>
+                <span id="uptime">Loading...</span>
+            </div>
+        </div>
+    </div>
+    <script src="renderer.js"></script>
+</body>
+</html>
