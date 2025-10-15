@@ -2,8 +2,7 @@ const { app, BrowserWindow, globalShortcut, screen, ipcMain } = require('electro
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
-const util = require('util');
-const execAsync = util.promisify(require('child_process').exec);
+const si = require('systeminformation');
 
 let mainWindow;
 let config = { autoLaunch: false, shortcut: 'CommandOrControl+G' };
@@ -12,136 +11,71 @@ let updateInterval;
 async function collectStats() {
     const stats = {};
 
-    // CPU Temperature
-    try {
-        let { stdout } = await execAsync('sensors | grep -A 0 "Tctl:" | cut -c15-22');
-        stats.cpuTemp = parseFloat(stdout.trim()).toFixed(1);
-    } catch {
-        try {
-            const raw = fs.readFileSync('/sys/class/thermal/thermal_zone0/temp', 'utf8');
-            stats.cpuTemp = (parseInt(raw) / 1000).toFixed(1);
-        } catch {
-            stats.cpuTemp = 'N/A';
-        }
-    }
+    // CPU Stats
+    const cpuTemp = await si.cpuTemperature();
+    stats.cpuTemp = cpuTemp.main !== null ? cpuTemp.main.toFixed(1) : 'N/A';
 
-    // CPU Usage
-    try {
-        let { stdout } = await execAsync('top -bn1 | grep "Cpu(s)" | sed "s/.*, *\\([0-9.]*\\)%* id.*/\\1/" | awk \'{print 100 - $1}\'');
-        stats.cpuUsage = parseFloat(stdout.trim()).toFixed(1);
-    } catch {
-        stats.cpuUsage = 'N/A';
-    }
+    const currentLoad = await si.currentLoad();
+    stats.cpuUsage = currentLoad.currentLoad.toFixed(1);
 
-    // CPU Frequency
-    try {
-        let { stdout } = await execAsync('cat /proc/cpuinfo | grep "cpu MHz" | head -1 | awk \'{print $4}\'');
-        stats.cpuFreq = parseFloat(stdout.trim()).toFixed(0);
-    } catch {
-        stats.cpuFreq = 'N/A';
-    }
+    const cpu = await si.cpu();
+    stats.cpuFreq = cpu.speed ? (cpu.speed * 1000).toFixed(0) : 'N/A';
 
-    // CPU Fan
-    try {
-        let { stdout } = await execAsync('sensors | grep "fan1:" | awk \'{print $2}\'');
-        stats.cpuFan = stdout.trim();
-    } catch {
-        stats.cpuFan = 'N/A';
-    }
+    stats.cpuVoltage = 'N/A'; // systeminformation doesn't provide voltage directly
 
-    // GPU Temperature
-    try {
-        let { stdout } = await execAsync('nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader');
-        stats.gpuTemp = parseFloat(stdout.trim()).toFixed(1);
-    } catch {
-        try {
-            let { stdout } = await execAsync('rocm-smi --showtemp | grep "GPU Temp" | awk \'{print $4}\'');
-            stats.gpuTemp = parseFloat(stdout.trim()).toFixed(1);
-        } catch {
-            stats.gpuTemp = 'N/A';
-        }
-    }
+    // For fans, systeminformation has si.chassis() but limited, fallback to sensors if needed
+    stats.cpuFan = 'N/A';
 
-    // GPU Usage
-    try {
-        let { stdout } = await execAsync('nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader');
-        stats.gpuUsage = parseFloat(stdout.trim()).toFixed(1);
-    } catch {
-        try {
-            let { stdout } = await execAsync('rocm-smi --showutil | grep "GPU use" | awk \'{print $4}\'');
-            stats.gpuUsage = parseFloat(stdout.trim()).toFixed(1);
-        } catch {
-            stats.gpuUsage = 'N/A';
-        }
-    }
-
-    // GPU Fan
-    try {
-        let { stdout } = await execAsync('nvidia-smi --query-gpu=fan.speed --format=csv,noheader');
-        stats.gpuFan = parseFloat(stdout.trim()).toFixed(1);
-    } catch {
-        try {
-            let { stdout } = await execAsync('rocm-smi --showfan | grep "Fan Level" | awk \'{print $4}\'');
-            stats.gpuFan = parseFloat(stdout.trim()).toFixed(1);
-        } catch {
-            stats.gpuFan = 'N/A';
-        }
-    }
-
-    // GPU Memory
-    try {
-        let { stdout } = await execAsync('nvidia-smi --query-gpu=memory.used,memory.total --format=csv,noheader');
-        const [used, total] = stdout.trim().split(',').map(s => s.trim().replace(' MiB', ''));
-        stats.gpuMem = `${used}/${total}`;
-    } catch {
-        try {
-            let { stdout } = await execAsync('rocm-smi --showmeminfo vram | grep "Used" | awk \'{print $4 "/" $5}\'');
-            stats.gpuMem = stdout.trim();
-        } catch {
-            stats.gpuMem = 'N/A';
-        }
+    // GPU Stats
+    const graphics = await si.graphics();
+    if (graphics.controllers && graphics.controllers.length > 0) {
+        const gpu = graphics.controllers[0];
+        stats.gpuTemp = gpu.temperatureGpu ? gpu.temperatureGpu.toFixed(1) : 'N/A';
+        stats.gpuUsage = gpu.utilizationGpu ? gpu.utilizationGpu.toFixed(1) : 'N/A';
+        stats.gpuFan = gpu.fanPercent ? gpu.fanPercent.toFixed(1) : 'N/A';
+        stats.gpuMem = gpu.memoryUsed ? `${gpu.memoryUsed}/${gpu.memoryTotal}` : 'N/A';
+        stats.gpuPower = gpu.powerDraw ? gpu.powerDraw.toFixed(1) : 'N/A';
+    } else {
+        stats.gpuTemp = 'N/A';
+        stats.gpuUsage = 'N/A';
+        stats.gpuFan = 'N/A';
+        stats.gpuMem = 'N/A';
+        stats.gpuPower = 'N/A';
     }
 
     // RAM Usage
-    const totalMem = os.totalmem();
-    const freeMem = os.freemem();
-    const usedMem = totalMem - freeMem;
-    stats.ramUsage = ((usedMem / totalMem) * 100).toFixed(1);
+    const mem = await si.mem();
+    stats.ramUsage = `${(mem.used / 1024 / 1024 / 1024).toFixed(1)} / ${(mem.total / 1024 / 1024 / 1024).toFixed(1)} GB`;
 
     // Disk Usage
-    try {
-        let { stdout } = await execAsync('df -h / | tail -1 | awk \'{print $5}\' | sed \'s/%//\'');
-        stats.diskUsage = stdout.trim();
-    } catch {
-        stats.diskUsage = 'N/A';
-    }
+    const fsSize = await si.fsSize();
+    const root = fsSize.find(d => d.mount === '/');
+    stats.diskUsage = root ? `${(root.used / 1024 / 1024 / 1024).toFixed(1)} / ${(root.size / 1024 / 1024 / 1024).toFixed(1)} GB` : 'N/A';
 
-    // Battery Level
-    try {
-        const batteryPath = '/sys/class/power_supply/BAT0/capacity';
-        if (fs.existsSync(batteryPath)) {
-            stats.batteryLevel = fs.readFileSync(batteryPath, 'utf8').trim();
-        } else {
-            stats.batteryLevel = 'N/A';
-        }
-    } catch {
-        stats.batteryLevel = 'N/A';
-    }
+    // Battery
+    const battery = await si.battery();
+    stats.batteryLevel = battery.hasBattery ? battery.percent : 'N/A';
 
     // Uptime
-    const uptimeSeconds = os.uptime();
-    const days = Math.floor(uptimeSeconds / (3600 * 24));
-    const hours = Math.floor((uptimeSeconds % (3600 * 24)) / 3600);
-    const minutes = Math.floor((uptimeSeconds % 3600) / 60);
-    const seconds = Math.floor(uptimeSeconds % 60);
-    stats.uptime = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+    const time = si.time();
+    stats.uptime = time.uptimeFormatted || `${Math.floor(os.uptime() / 3600)}h ${Math.floor((os.uptime() % 3600) / 60)}m`;
 
-    // Network (placeholder)
-    stats.netDownload = (Math.random() * 100).toFixed(1);
-    stats.netUpload = (Math.random() * 20).toFixed(1);
+    // Network
+    const netStats = await si.networkStats();
+    if (netStats.length > 0) {
+        const net = netStats[0];
+        stats.netDownload = (net.rx_sec / 1024 / 1024 * 8).toFixed(2) + ' Mbps';
+        stats.netUpload = (net.tx_sec / 1024 / 1024 * 8).toFixed(2) + ' Mbps';
+    } else {
+        stats.netDownload = 'N/A';
+        stats.netUpload = 'N/A';
+    }
 
-    // FPS (placeholder)
-    stats.fps = Math.floor(Math.random() * 60 + 30);
+    // FPS placeholder
+    stats.fps = 'N/A';
+
+    // Load Avg
+    stats.loadAvg = os.loadavg().map(l => l.toFixed(2)).join(' ');
 
     return stats;
 }
