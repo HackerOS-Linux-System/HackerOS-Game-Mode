@@ -1,19 +1,35 @@
 {
   "name": "hackeros-game-mode",
   "version": "1.0.0",
-  "description": "HackerOS Game Mode overlay for Linux system monitoring",
+  "description": "HackerOS Game Mode overlay for Linux system monitoring (inspired by Asus Armoury Crate)",
   "main": "main.js",
-  "scripts": {
-    "start": "electron .",
-    "build": "electron-packager . HackerOSGameMode --platform=linux --arch=x64 --out=dist --overwrite"
-  },
   "author": "HackerOS Team",
   "license": "MIT",
-  "dependencies": {
-    "electron": "^25.0.0"
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --linux AppImage"
   },
   "devDependencies": {
-    "electron-packager": "^17.0.0"
+    "electron": "^25.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.hackeros.gamemode",
+    "productName": "HackerOS Game Mode",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      "!dist/*",
+      "!node_modules/.cache/*"
+    ],
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Utility",
+      "icon": "assets/icons"
+    }
   }
 }
-
