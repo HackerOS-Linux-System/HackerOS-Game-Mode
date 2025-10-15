@@ -7,53 +7,38 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="overlay">
-        <h1>HackerOS Game Mode</h1>
-        <div class="stats">
-            <div class="stat">
-                <label>CPU Temperature:</label>
-                <span id="cpu-temp">Loading...</span> °C
-            </div>
-            <div class="stat">
-                <label>CPU Usage:</label>
-                <span id="cpu-usage">Loading...</span> %
-            </div>
-            <div class="stat">
-                <label>CPU Frequency:</label>
-                <span id="cpu-freq">Loading...</span> MHz
-            </div>
-            <div class="stat">
-                <label>GPU Temperature:</label>
-                <span id="gpu-temp">Loading...</span> °C
-            </div>
-            <div class="stat">
-                <label>GPU Usage:</label>
-                <span id="gpu-usage">Loading...</span> %
-            </div>
-            <div class="stat">
-                <label>GPU Fan Speed:</label>
-                <span id="gpu-fan">Loading...</span> %
-            </div>
-            <div class="stat">
-                <label>GPU Memory:</label>
-                <span id="gpu-mem">Loading...</span> MiB
-            </div>
-            <div class="stat">
-                <label>RAM Usage:</label>
-                <span id="ram-usage">Loading...</span> %
-            </div>
-            <div class="stat">
-                <label>Disk Usage:</label>
-                <span id="disk-usage">Loading...</span> %
-            </div>
-            <div class="stat">
-                <label>Battery Level:</label>
-                <span id="battery-level">Loading...</span> %
-            </div>
-            <div class="stat">
-                <label>System Uptime:</label>
-                <span id="uptime">Loading...</span>
-            </div>
+    <div class="overlay-container">
+        <div class="overlay-top-left">
+            <h2>CPU Stats</h2>
+            <p>Temperature: <span id="cpu-temp">Loading...</span> °C</p>
+            <p>Usage: <span id="cpu-usage">Loading...</span> %</p>
+            <p>Frequency: <span id="cpu-freq">Loading...</span> MHz</p>
+            <p>Fan Speed: <span id="cpu-fan">Loading...</span> RPM</p>
+        </div>
+        <div class="overlay-top-right">
+            <h2>GPU Stats</h2>
+            <p>Temperature: <span id="gpu-temp">Loading...</span> °C</p>
+            <p>Usage: <span id="gpu-usage">Loading...</span> %</p>
+            <p>Fan Speed: <span id="gpu-fan">Loading...</span> %</p>
+            <p>Memory: <span id="gpu-mem">Loading...</span> MiB</p>
+        </div>
+        <div class="overlay-bottom-left">
+            <h2>System Stats</h2>
+            <p>RAM Usage: <span id="ram-usage">Loading...</span> %</p>
+            <p>Disk Usage: <span id="disk-usage">Loading...</span> %</p>
+            <p>Battery: <span id="battery-level">Loading...</span> %</p>
+            <p>Uptime: <span id="uptime">Loading...</span></p>
+        </div>
+        <div class="overlay-bottom-right">
+            <h2>Network & FPS</h2>
+            <p>Download: <span id="net-download">Loading...</span> Mbps</p>
+            <p>Upload: <span id="net-upload">Loading...</span> Mbps</p>
+            <p>FPS: <span id="fps">Loading...</span></p>
+        </div>
+        <div class="overlay-center">
+            <h1>HackerOS Game Mode</h1>
+            <canvas id="cpu-chart" width="200" height="100"></canvas>
+            <canvas id="gpu-chart" width="200" height="100"></canvas>
         </div>
     </div>
     <script src="renderer.js"></script>
