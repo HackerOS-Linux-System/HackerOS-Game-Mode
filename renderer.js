@@ -1,41 +1,114 @@
-const { ipcRenderer } = require('electron');
-
 let cpuUsageHistory = [];
 let gpuUsageHistory = [];
 const maxHistory = 30;
 
-ipcRenderer.on('update-stats', (event, stats) => {
+// Prosty FPS counter via requestAnimationFrame
+let fps = 0;
+let frameCount = 0;
+let lastTime = performance.now();
+
+let recorder;
+let chunks = [];
+let stream;
+
+function updateFPS() {
+    const now = performance.now();
+    frameCount++;
+    if (now - lastTime >= 1000) {
+        fps = frameCount;
+        frameCount = 0;
+        lastTime = now;
+    }
+    document.getElementById('fps').textContent = fps;
+    requestAnimationFrame(updateFPS);
+}
+
+requestAnimationFrame(updateFPS); // Uruchom counter
+
+window.electronAPI.onUpdateStats((event, stats) => {
     document.getElementById('cpu-temp').textContent = stats.cpuTemp;
     document.getElementById('cpu-usage').textContent = stats.cpuUsage;
     document.getElementById('cpu-freq').textContent = stats.cpuFreq;
-    document.getElementById('cpu-voltage').textContent = stats.cpuVoltage;
+    document.getElementById('cpu-cores').textContent = stats.cpuCores; // Nowe pole
     document.getElementById('cpu-fan').textContent = stats.cpuFan;
-    document.getElementById('gpu-temp').textContent = stats.gpuTemp;
-    document.getElementById('gpu-usage').textContent = stats.gpuUsage;
-    document.getElementById('gpu-fan').textContent = stats.gpuFan;
-    document.getElementById('gpu-mem').textContent = stats.gpuMem;
-    document.getElementById('gpu-power').textContent = stats.gpuPower;
     document.getElementById('ram-usage').textContent = stats.ramUsage;
     document.getElementById('disk-usage').textContent = stats.diskUsage;
     document.getElementById('battery-level').textContent = stats.batteryLevel;
     document.getElementById('uptime').textContent = stats.uptime;
     document.getElementById('net-download').textContent = stats.netDownload;
     document.getElementById('net-upload').textContent = stats.netUpload;
-    document.getElementById('fps').textContent = stats.fps;
     document.getElementById('load-avg').textContent = stats.loadAvg;
 
-    if (stats.cpuUsage !== 'N/A') {
+    if (stats.cpuUsage !== '--') {
         cpuUsageHistory.push(parseFloat(stats.cpuUsage));
         if (cpuUsageHistory.length > maxHistory) cpuUsageHistory.shift();
         drawCpuChart();
         drawCpuGauge(parseFloat(stats.cpuUsage) || 0);
     }
 
-    if (stats.gpuUsage !== 'N/A') {
+    if (stats.gpuUsage !== '--') {
         gpuUsageHistory.push(parseFloat(stats.gpuUsage));
         if (gpuUsageHistory.length > maxHistory) gpuUsageHistory.shift();
         drawGpuChart();
-        drawGpuGauge(parseFloat(stats.gpuUsage) || 0);
+    }
+});
+
+window.electronAPI.onGetRects(() => {
+    const topRightElement = document.querySelector('.overlay-top-right');
+    const topRight = topRightElement.getBoundingClientRect();
+    window.electronAPI.send('rects', {
+        topRight: {
+            top: topRight.top,
+            right: parseFloat(getComputedStyle(topRightElement).right), // right z CSS (30px)
+    width: topRight.width,
+    height: topRight.height
+        }
+    });
+});
+
+document.getElementById('screenshot-btn').addEventListener('click', () => {
+    window.electronAPI.send('take-screenshot');
+});
+
+document.getElementById('record-btn').addEventListener('click', async () => {
+    try {
+        const sources = await window.electronAPI.desktopCapturer.getSources({ types: ['screen'] });
+        const sourceId = sources[0].id;
+        const constraints = {
+            audio: false,
+            video: {
+                mandatory: {
+                    chromeMediaSource: 'desktop',
+                    chromeMediaSourceId: sourceId
+                }
+            }
+        };
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
+        recorder = new MediaRecorder(stream);
+        chunks = [];
+        recorder.ondataavailable = (e) => chunks.push(e.data);
+        recorder.onstop = () => {
+            const blob = new Blob(chunks, { type: 'video/webm' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `recording_${Date.now()}.webm`;
+            a.click();
+            URL.revokeObjectURL(url);
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+        };
+        recorder.start();
+        window.electronAPI.send('start-recording');
+    } catch (err) {
+        console.error('Error starting recording:', err);
+    }
+});
+
+window.electronAPI.onStopRecording(() => {
+    if (recorder) {
+        recorder.stop();
     }
 });
 
@@ -51,6 +124,7 @@ function drawGpuChart() {
 
 function drawLineChart(ctx, data, color) {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    if (data.length === 0) return;
     ctx.beginPath();
     ctx.strokeStyle = color;
     ctx.lineWidth = 2;
@@ -67,11 +141,6 @@ function drawLineChart(ctx, data, color) {
 function drawCpuGauge(value) {
     const ctx = document.getElementById('cpu-gauge').getContext('2d');
     drawGauge(ctx, value / 100, '#00BFFF', 'CPU Usage');
-}
-
-function drawGpuGauge(value) {
-    const ctx = document.getElementById('gpu-gauge').getContext('2d');
-    drawGauge(ctx, value / 100, '#FF4500', 'GPU Usage');
 }
 
 function drawGauge(ctx, percent, color, label) {
