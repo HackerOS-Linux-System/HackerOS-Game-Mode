@@ -231,7 +231,9 @@ app.on('activate', () => {
 });
 
 ipcMain.on('rects', (event, rects) => {
-    interactRect = rects.topRight;
+    if (rects && rects.topRight) {
+        interactRect = rects.topRight;
+    }
 });
 
 ipcMain.on('take-screenshot', async () => {
