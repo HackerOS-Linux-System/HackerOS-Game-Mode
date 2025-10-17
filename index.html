@@ -11,34 +11,30 @@
         <div class="overlay-top-left">
             <h2>CPU Stats</h2>
             <canvas id="cpu-gauge" width="150" height="150"></canvas>
-            <p>Temperature: <span id="cpu-temp">N/A</span> °C</p>
-            <p>Usage: <span id="cpu-usage">N/A</span> %</p>
-            <p>Frequency: <span id="cpu-freq">N/A</span> MHz</p>
-            <p>Voltage: <span id="cpu-voltage">N/A</span> V</p>
-            <p>Fan Speed: <span id="cpu-fan">N/A</span> RPM</p>
+            <p>Temperature: <span id="cpu-temp">--</span> °C</p>
+            <p>Usage: <span id="cpu-usage">--</span> %</p>
+            <p>Frequency: <span id="cpu-freq">--</span> MHz</p>
+            <p>Cores: <span id="cpu-cores">--</span></p> <!-- Zmienione z voltage -->
+            <p>Fan Speed: <span id="cpu-fan">--</span> RPM</p>
         </div>
         <div class="overlay-top-right">
-            <h2>GPU Stats</h2>
-            <canvas id="gpu-gauge" width="150" height="150"></canvas>
-            <p>Temperature: <span id="gpu-temp">N/A</span> °C</p>
-            <p>Usage: <span id="gpu-usage">N/A</span> %</p>
-            <p>Fan Speed: <span id="gpu-fan">N/A</span> %</p>
-            <p>Memory: <span id="gpu-mem">N/A</span> MiB</p>
-            <p>Power: <span id="gpu-power">N/A</span> W</p>
+            <h2>Tools</h2>
+            <button id="screenshot-btn" class="mode-btn">Screenshot</button>
+            <button id="record-btn" class="mode-btn">Start Recording</button>
         </div>
         <div class="overlay-bottom-left">
             <h2>System Stats</h2>
-            <p>RAM Usage: <span id="ram-usage">N/A</span></p>
-            <p>Disk Usage: <span id="disk-usage">N/A</span></p>
-            <p>Battery: <span id="battery-level">N/A</span> %</p>
-            <p>Uptime: <span id="uptime">N/A</span></p>
-            <p>Load Avg: <span id="load-avg">N/A</span></p>
+            <p>RAM Usage: <span id="ram-usage">--</span> GB</p>
+            <p>Disk Usage: <span id="disk-usage">--</span> GB</p>
+            <p>Battery: <span id="battery-level">--</span> %</p>
+            <p>Uptime: <span id="uptime">--</span></p>
+            <p>Load Avg: <span id="load-avg">--</span></p>
         </div>
         <div class="overlay-bottom-right">
             <h2>Network & FPS</h2>
-            <p>Download: <span id="net-download">N/A</span></p>
-            <p>Upload: <span id="net-upload">N/A</span></p>
-            <p>FPS: <span id="fps">N/A</span></p>
+            <p>Download: <span id="net-download">--</span> Mbps</p>
+            <p>Upload: <span id="net-upload">--</span> Mbps</p>
+            <p>FPS: <span id="fps">--</span></p>
         </div>
         <div class="overlay-center">
             <h1>HackerOS Game Mode</h1>
