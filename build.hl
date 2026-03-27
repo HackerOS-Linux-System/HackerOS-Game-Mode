@@ -1,5 +1,12 @@
 // npm
+// cargo
 
 > cd source-code
+> cd classic
+> npm install
+> npm run build
+! if you wont build special:
+> cd ..
+> cd special
 > npm install
 > npm run build
